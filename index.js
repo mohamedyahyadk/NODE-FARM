@@ -1,12 +1,29 @@
 const { Console } = require("console");
 const http = require("http");
+const url = require("url");
+const fs = require("fs");
+
+// templates
+const templateOverview = fs.readFileSync(
+  `${__dirname}/templates/template-overview.html`,
+  "utf-8"
+);
 
 // creating the server
 const server = http.createServer((req, res) => {
-  res.writeHead(200, {
-    "content-type": "text/html",
-  });
-  res.end("<h1>hello world</h1>");
+  const { pathname } = url.parse(req.url, true);
+  if (pathname === "/") {
+    res.writeHead(200, {
+      "content-type": "text/html",
+    });
+    const output = templateOverview;
+    res.end(output);
+  } else {
+    res.writeHead(404, {
+      "content-type": "text/html",
+    });
+    res.end("<h1>page not found!</h1>");
+  }
 });
 
 // start the server
