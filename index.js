@@ -12,11 +12,16 @@ const tempCard = fs.readFileSync(
   `${__dirname}/templates/template-card.html`,
   "utf-8"
 );
+const tempProduct = fs.readFileSync(
+  `${__dirname}/templates/template-product.html`,
+  "utf-8"
+);
 
 // logic
 const replaceTemplate = (temp, product) => {
   let output = temp.replace(/{%IMAGE%}/g, product.image);
   output = output.replace(/{%PRODUCTNAME%}/g, product.productName);
+  output = output.replace(/{%ID%}/g, product.id);
   output = output.replace(/{%FROM%}/g, product.from);
   output = output.replace(/{%NUTRIENTS%}/g, product.nutrients);
   output = output.replace(/{%QUANTITY%}/g, product.quantity);
@@ -33,8 +38,9 @@ const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
 const dataObj = JSON.parse(data);
 // creating the server
 const server = http.createServer((req, res) => {
-  const { pathname } = url.parse(req.url, true);
-  if (pathname === "/") {
+  const { query, pathname } = url.parse(req.url, true);
+  //  overview page
+  if (pathname === "/" || pathname === "/overview") {
     res.writeHead(200, {
       "content-type": "text/html",
     });
@@ -43,6 +49,14 @@ const server = http.createServer((req, res) => {
       .join("");
 
     const output = templateOverview.replace("{%PRODUCT-CARDS%}", cardHtml);
+    res.end(output);
+    // product page
+  } else if (pathname == "/product") {
+    res.writeHead(200, {
+      "content-type": "text/html",
+    });
+    const prod = dataObj[query.id];
+    const output = replaceTemplate(tempProduct, prod);
     res.end(output);
   } else {
     res.writeHead(404, {
